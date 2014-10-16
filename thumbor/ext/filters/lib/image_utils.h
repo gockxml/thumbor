@@ -14,7 +14,6 @@
     ( ((1.0 - (alpha1 / MAX_RGB_DOUBLE)) * (double) color1) + \
       ((1.0 - (alpha2 / MAX_RGB_DOUBLE)) * (double) color2 * (alpha1 / MAX_RGB_DOUBLE)) )
 
-
 static inline int
 bytes_per_pixel(char *mode)
 {

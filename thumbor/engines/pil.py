@@ -220,7 +220,7 @@ class Engine(BaseEngine):
         else:
             self.image = self.image.convert('L')
 
-    def paste(self, other_engine, pos, merge=True):
+    def paste(self, other_engine, pos, merge=True, blend=0):
         if merge and not FILTERS_AVAILABLE:
             raise RuntimeError(
                 'You need filters enabled to use paste with merge. Please reinstall ' +
@@ -239,7 +239,7 @@ class Engine(BaseEngine):
             other_mode, other_data = other_engine.image_data_as_rgb()
             imgdata = _composite.apply(
                 mode, data, sz[0], sz[1],
-                other_data, other_size[0], other_size[1], pos[0], pos[1])
+                other_data, other_size[0], other_size[1], pos[0], pos[1], merge, blend)
             self.set_image_data(imgdata)
         else:
             image.paste(other_image, pos)

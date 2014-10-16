@@ -1,46 +1,9 @@
-#include "filter.h"
-#include "blend.h"
-
-static PyObject* apply_blend_multiply(PyObject *args){
-#define ALPHA_BLEND_COLOR_CHANNEL(color1, alpha1, color2, alpha2) BLEND_MULTIPLY(CALC_COLOR(color1, alpha1), CALC_COLOR(color2, alpha2))
-#include "_composite.def"
-}
-
-static PyObject* apply_blend_normal(PyObject *args){
-#define ALPHA_BLEND_COLOR_CHANNEL(color1, alpha1, color2, alpha2) BLEND_NORMAL(CALC_COLOR(color1, alpha1), CALC_COLOR(color2, alpha2) * (alpha1 / MAX_RGB_DOUBLE))
-#include "_composite.def"
-}
-
-static PyObject* apply_blend_screen(PyObject *args){
-#define ALPHA_BLEND_COLOR_CHANNEL(color1, alpha1, color2, alpha2) BLEND_SCREEN(CALC_COLOR(color1, alpha1), CALC_COLOR(color2, alpha2))
-#include "_composite.def"
-}
-
-static PyObject*
-_composite_apply(PyObject *self, PyObject *args)
-{
-    PyObject *py_image1 = NULL, *py_image2 = NULL, *image_mode = NULL, *blend = NULL,
+PyObject *py_image1 = NULL, *py_image2 = NULL, *image_mode = NULL, *blend,
              *w1, *h1, *w2, *h2, *py_x, *py_y, *py_merge = NULL;
 
     if (!PyArg_UnpackTuple(args, "apply", 10, 11, &image_mode, &py_image1, &w1, &h1, &py_image2, &w2, &h2, &py_x, &py_y, &py_merge, &blend)) {
         return NULL;
     }
-
-    int blend_mode = (int)PyInt_AsLong(blend);
-    switch(blend_mode){
-        case MODE_MULTIPLY:
-            return apply_blend_multiply(args);
-            break;
-        case MODE_SCREEN:
-            return apply_blend_screen(args);
-            break;
-        default:
-            return apply_blend_normal(args);
-            break;
-    }
-
-    //return apply_composite(args);
-    /*
 
     char *image_mode_str = PyString_AsString(image_mode);
 
@@ -115,9 +78,9 @@ _composite_apply(PyObject *self, PyObject *args)
                 delta = 1.0 - delta;
                 delta = (delta <= SMALL_DOUBLE) ? 1.0 : (1.0 / delta);
 
-                r = delta * ALPHA_COMPOSITE_COLOR_CHANNEL3(r2, a2, r1, a1);
-                g = delta * ALPHA_COMPOSITE_COLOR_CHANNEL3(g2, a2, g1, a1);
-                b = delta * ALPHA_COMPOSITE_COLOR_CHANNEL3(b2, a2, b1, a1);
+                r = delta * ALPHA_BLEND_COLOR_CHANNEL(r2, a2, r1, a1);
+                g = delta * ALPHA_BLEND_COLOR_CHANNEL(g2, a2, g1, a1);
+                b = delta * ALPHA_BLEND_COLOR_CHANNEL(b2, a2, b1, a1);
             } else {
                 if (a1 == 0) {
                     r = r2;
@@ -144,10 +107,6 @@ _composite_apply(PyObject *self, PyObject *args)
 
     Py_INCREF(py_image1);
     return py_image1;
-    */
-}
 
-FILTER_MODULE(_composite,
-    "apply(image_mode, buffer1, width1, height1, buffer2, width2, height2, pos_x, pos_ys, merge, blend) -> string\n"
-    "Merges two images specified by buffer1 and buffer2, taking in consideration both alpha channels."
-)
+#undef ALPHA_BLEND_COLOR_CHANNEL
+
