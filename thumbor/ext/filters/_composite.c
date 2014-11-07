@@ -2,7 +2,7 @@
 #include "blend.h"
 
 static PyObject* apply_blend_multiply(PyObject *args){
-#define ALPHA_BLEND_COLOR_CHANNEL(color1, alpha1, color2, alpha2) BLEND_MULTIPLY(CALC_COLOR(color1, alpha1), CALC_COLOR(color2, alpha2))
+#define ALPHA_BLEND_COLOR_CHANNEL(color1, alpha1, color2, alpha2) BLEND_MULTIPLY(CALC_COLOR(color1, alpha1), CALC_COLOR(color2, alpha2), alpha1, alpha2)
 #include "_composite.def"
 }
 
