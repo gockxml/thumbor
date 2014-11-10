@@ -28,10 +28,10 @@ double* calculate_second_derivative(unsigned char *points, unsigned char size) {
 
     for (i = 1; i < n - 1; i++) {
         int j = i* 2, k = i * 3;
-        matrix[k] = (points[j] - points[j - 2]) * 1.0 / 6;
-        matrix[k + 1] = (points[j + 2] - points[j - 2]) * 1.0 / 3;
-        matrix[k + 2] = (points[j + 2] - points[j]) * 1.0 /6;
-        result[i] = (points[j + 2 + 1] - points[j + 1]) / (points[j + 2] - points[j]) - (points[j + 1] - points[j - 2 + 1]) / (points[j] - points[j - 2]);
+        matrix[k] = (double)(points[j] - points[j - 2]) / 6;
+        matrix[k + 1] = (double)(points[j + 2] - points[j - 2]) / 3;
+        matrix[k + 2] = (double)(points[j + 2] - points[j]) /6;
+        result[i] = (double)(points[j + 2 + 1] - points[j + 1]) / (points[j + 2] - points[j]) - (double)(points[j + 1] - points[j - 2 + 1]) / (points[j] - points[j - 2]);
 
     }
 
@@ -70,19 +70,22 @@ unsigned char* cubic_spline_interpolation(unsigned char *points, int count_p, in
 
     int i;
     for (i = 0; i < size; i ++) {
-        items[i] = (unsigned char)i;
+        items[i] = (unsigned char)points[1];
     }
-    for (i = 0; i < count_p; i++) {
+    for (i = 0; i < count_p - 1; i++) {
         unsigned char current_x = points[i * 2], current_y = points[i * 2 + 1], next_x = points[i * 2 + 2], next_y = points[i * 2 + 2 + 1], x;
         for (x = current_x; x < next_x; x++) {
-            double t = (x - current_x) * 1.0 / (next_x - current_x),
+            double t = (double)(x - current_x) / (next_x - current_x),
                    a = 1 - t,
                    b = t,
                    h = next_x - current_x,
-                   y = a * current_y + b * next_y + (h * h / 6) * ((a * a * a - a) * sd[i] + (b * b * b - b) * sd[i + 1]);
+                   y = a * current_y + b * next_y + (h * h / 6.0) * ((a * a * a - a) * sd[i] + (b * b * b - b) * sd[i + 1]);
 
-            items[x] = (unsigned char)floor(MINMAX(y, 0, 255));
+            items[x] = (unsigned char)(MINMAX(round(y), 0, 255));
         }
+    }
+    for (i = points[count_p * 2 - 2]; i<size; i++){
+        items[i] = points[count_p * 2 - 1];
     }
     free(sd);
     return items;
@@ -112,6 +115,23 @@ _curve_apply(PyObject *self, PyObject *args)
         i = 0, r, g, b;
 
     size -= num_bytes;
+    
+    for (int j = 0; j < 256; j++ ){
+        printf("x y %d %d", j, (int)points_a[j]);
+        printf("\n");
+    }
+    for (int j = 0; j < 256; j++ ){
+        printf("x y %d %d", j, (int)points_r[j]);
+        printf("\n");
+    }
+    for (int j = 0; j < 256; j++ ){
+        printf("x y %d %d", j, (int)points_g[j]);
+        printf("\n");
+    }
+    for (int j = 0; j < 256; j++ ){
+        printf("x y %d %d", j, (int)points_b[j]);
+        printf("\n");
+    }
     for (; i <= size; i += num_bytes) {
         r = ptr[i + r_idx];
         g = ptr[i + g_idx];
@@ -125,9 +145,9 @@ _curve_apply(PyObject *self, PyObject *args)
         g = points_a[g];
         b = points_a[b];
 
-        ptr[i + r_idx] = ADJUST_COLOR(r);
-        ptr[i + g_idx] = ADJUST_COLOR(g);
-        ptr[i + b_idx] = ADJUST_COLOR(b);
+        ptr[i + r_idx] = r;
+        ptr[i + g_idx] = g;
+        ptr[i + b_idx] = b;
     }
 
     free(points_a);
