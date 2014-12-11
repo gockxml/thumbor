@@ -116,22 +116,6 @@ _curve_apply(PyObject *self, PyObject *args)
 
     size -= num_bytes;
     
-    for (int j = 0; j < 256; j++ ){
-        printf("x y %d %d", j, (int)points_a[j]);
-        printf("\n");
-    }
-    for (int j = 0; j < 256; j++ ){
-        printf("x y %d %d", j, (int)points_r[j]);
-        printf("\n");
-    }
-    for (int j = 0; j < 256; j++ ){
-        printf("x y %d %d", j, (int)points_g[j]);
-        printf("\n");
-    }
-    for (int j = 0; j < 256; j++ ){
-        printf("x y %d %d", j, (int)points_b[j]);
-        printf("\n");
-    }
     for (; i <= size; i += num_bytes) {
         r = ptr[i + r_idx];
         g = ptr[i + g_idx];
